@@ -1,5 +1,6 @@
 import hashlib
 import requests
+import uuid
 
 import sys
 
@@ -32,6 +33,15 @@ def valid_proof(last_proof, proof):
 
 
 if __name__ == '__main__':
+    try:
+        file = open("./my_id.txt", 'r')
+        userID = file.read()
+    except IOError:
+        file = open("./my_id.txt", 'w')
+        userID = str(uuid.uuid1()).replace("-", "")
+        file.write(userID)
+    file.close()
+
     # What node are we interacting with?
     if len(sys.argv) > 1:
         node = int(sys.argv[1])
@@ -46,7 +56,7 @@ if __name__ == '__main__':
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
 
-        post_data = {"proof": new_proof}
+        post_data = {"proof": new_proof, "id": userID}
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
